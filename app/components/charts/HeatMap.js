@@ -6,7 +6,7 @@ class HeatMap extends React.Component {
     constructor(props){
         super(props);
         this.data = this.props.heatMapData;
-       // this.data = [{"timestamp": "2014-09-25T00:00:00", "value": {"PM2.5": 30.22}}, {"timestamp": "2014-09-25T01:00:00", "value": {"PM2.5": 41.61}}, {"timestamp": "2014-09-25T02:00:00", "value": {"PM2.5": 50.71}}, {"timestamp": "2014-09-25T03:00:00", "value": {"PM2.5": 57.34}}, {"timestamp": "2014-09-25T04:00:00", "value": {"PM2.5": 79.64}}, {"timestamp": "2014-09-25T05:00:00", "value": {"PM2.5": 76.93}}, {"timestamp": "2014-09-25T06:00:00", "value": {"PM2.5": 106.45}}, {"timestamp": "2014-09-25T07:00:00", "value": {"PM2.5": 79.72}}, {"timestamp": "2014-09-25T08:00:00", "value": {"PM2.5": 74.23}}, {"timestamp": "2014-09-25T09:00:00", "value": {"PM2.5": 90.48}}, {"timestamp": "2014-09-25T10:00:00", "value": {"PM2.5": 94.74}}, {"timestamp": "2014-09-25T11:00:00", "value": {"PM2.5": 85.97}}, {"timestamp": "2014-09-25T12:00:00", "value": {"PM2.5": 69.23}}, {"timestamp": "2014-09-25T13:00:00", "value": {"PM2.5": 82.63}}, {"timestamp": "2014-09-25T14:00:00", "value": {"PM2.5": 244.89}}];
+       // this.data = [{"timestamp": "2014-09-25T00:00:00", "value": {"Active Value": 30.22}}, {"timestamp": "2014-09-25T01:00:00", "value": {"Active Value": 41.61}}, {"timestamp": "2014-09-25T02:00:00", "value": {"Active Value": 50.71}}, {"timestamp": "2014-09-25T03:00:00", "value": {"Active Value": 57.34}}, {"timestamp": "2014-09-25T04:00:00", "value": {"Active Value": 79.64}}, {"timestamp": "2014-09-25T05:00:00", "value": {"Active Value": 76.93}}, {"timestamp": "2014-09-25T06:00:00", "value": {"Active Value": 106.45}}, {"timestamp": "2014-09-25T07:00:00", "value": {"Active Value": 79.72}}, {"timestamp": "2014-09-25T08:00:00", "value": {"Active Value": 74.23}}, {"timestamp": "2014-09-25T09:00:00", "value": {"Active Value": 90.48}}, {"timestamp": "2014-09-25T10:00:00", "value": {"Active Value": 94.74}}, {"timestamp": "2014-09-25T11:00:00", "value": {"Active Value": 85.97}}, {"timestamp": "2014-09-25T12:00:00", "value": {"Active Value": 69.23}}, {"timestamp": "2014-09-25T13:00:00", "value": {"Active Value": 82.63}}, {"timestamp": "2014-09-25T14:00:00", "value": {"Active Value": 244.89}}];
     }
     componentDidMount(){
       
@@ -54,9 +54,11 @@ class HeatMap extends React.Component {
                 diff -= monthdays[j-1]
             }
             diff += date11.getDate();
-            diff -=date22.getDate();
-            return diff;
-            
+            diff -= date22.getDate();
+            return diff;     
+        }
+        var hourDiff = function(date1,date2){
+          return ( (new Date(date1)).getHours()-( new Date(date2)).getHours());
         }
         //data vars for rendering
         var dateExtent = null,
@@ -97,17 +99,21 @@ class HeatMap extends React.Component {
                 valueObj['date'] = d3.timeParse(valueObj['timestamp']);
                 var day = valueObj['day'] = monthDayFormat(valueObj['date']);
                 var dayData = dailyValueExtent[day] = (dailyValueExtent[day] || [1000,-1]);
-                var pmValue = valueObj['value']['PM2.5'];
+                var pmValue = valueObj['value']['Active Value'];
                 dayData[0] = d3.min([dayData[0],pmValue]);
                 dayData[1] = d3.max([dayData[1],pmValue]);
             });
 
             dateExtent = d3.extent(this.data,function(d){
-            return d.date;
+                return d.date;
             });
-
-            axisWidth = itemSize*(dateDiff(dateExtent[1],dateExtent[0])+1);
-
+            //if x axis can not be date
+            if(dateDiff(dateExtent[1],dateExtent[0])<= 1 ){
+              axisWidth =  itemSize * (hourDiff(dateExtent[1],dateExtent[0]) + 1);
+            }else{
+                  axisWidth = itemSize*(dateDiff(dateExtent[1],dateExtent[0])+1);
+            }
+        
             //render axises
             //console.log(axisWidth); 414
             xAxis.scale((xAxisScale.range([0,axisWidth]).domain([new Date(dateExtent[0]),new Date(dateExtent[1])])));
@@ -129,8 +135,7 @@ class HeatMap extends React.Component {
             .attr('transform','translate(-10,'+axisHeight+') rotate(-90)');
 
             //render heatmap rects
-            //dayOffset = dayFormat(dateExtent[0]);
-            //dayOffset = month(dateExtent[0]);
+            
             dayOffset = dateExtent[0];
             rect = heatmap.selectAll('rect')
             .data(this.data)
@@ -146,10 +151,10 @@ class HeatMap extends React.Component {
             })
             .attr('fill','#ffffff');
 
-            rect.filter(function(d){ return d.value['PM2.5']>0;})
+            rect.filter(function(d){ return d.value['Active Value']>0;})
             .append('title')
             .text(function(d){
-                return monthDayFormat(d.date)+' '+d.value['PM2.5'];
+                return monthDayFormat(d.date)+' '+d.value['Active Value'];
             });
             if(typeof document!=='undefined'){
                     renderColor();
@@ -184,7 +189,7 @@ class HeatMap extends React.Component {
 
                 rect
                 .filter(function(d){
-                    return (d.value['PM2.5']>=0);
+                    return (d.value['Active Value']>=0);
                 })
                 .transition()
                 .delay(function(d){      
@@ -197,7 +202,7 @@ class HeatMap extends React.Component {
                     .range([0,1,2,3,4,5])
                     .domain((renderByCount?[0,500]:dailyValueExtent[d.day]));
 
-                    return d3.interpolate(a,colorCalibration[colorIndex(d.value['PM2.5'])]);
+                    return d3.interpolate(a,colorCalibration[colorIndex(d.value['Active Value'])]);
                 });
             }
             

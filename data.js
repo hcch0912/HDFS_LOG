@@ -4,10 +4,10 @@ var Promise = require('promise');
 //Time Peroid 
 var oneH = 1000 * 60 * 60;
 var timePeroidArr = [oneH, oneH * 6, oneH * 12, oneH * 24, oneH * 24 * 2, oneH * 24 * 7, oneH * 24 * 30,oneH * 24 * 360];
-
-
+var TSU = 6;
+var currentTime = new Date('2017-03-01 23:48:24');
 //Bubble Chart 
-var bubbleData = function(new_actionArr,upload_actionArr,login,del,delD,delAll){
+var BubbleData = function(new_actionArr,upload_actionArr,login,del,delD,delAll){
             return (
             {
                     "name": "resultArr",
@@ -21,7 +21,7 @@ var bubbleData = function(new_actionArr,upload_actionArr,login,del,delD,delAll){
                         "children": upload_actionArr
                         },
                         {"name": "登录", "size": login},
-                        {"name": "删除", "size": del},
+                        {"name": "删除集合", "size": del},
                         {"name":"删除数据", "size": delD},
                         {"name":"删除所有数据", "size": delAll}
                     ]
@@ -50,59 +50,174 @@ var    upload_actionArr = function(ImageD,TFData,DemD,VecD,FD,MD){
             );
     };
 //Line Chart   divided by 6 
- var lineData = function(currentTime,timeSpan) {
-     return([
-      {"date": new Date (currentTime - timeSpan * 5),"root":0},
-      {"date": new Date(currentTime - timeSpan * 4),"root":0},
-      {"date": new Date (currentTime - timeSpan * 3),"root":0},
-      {"date": new Date (currentTime - timeSpan * 2),"root":0},
-      {"date": new Date (currentTime - timeSpan) ,"root":0},
-      {"date":currentTime ,"root":0},
-      ]);
+ var LineData = function(currentTime,timeSpan,users) {
+    var data = [];
+       for(var i = TSU -1 ; i >= 0; i-- ){
+           data.push({"date": new Date( currentTime - timeSpan * i )});
+       } 
+
+      for(var i = 0 ; i< data.length ; i++){
+          for(var j =0; j< users.length ; j++){
+           
+              data[i][users[j]] = 0 ;
+          }
+      }
+      return data;
  }
 
+ var BarData = function(users, users_values) {
+     var series = [];
+     for(var i = 0; i<users.length ; i++){
+        series.push(
+            {
+                'label' : users[i],
+                'values': users_values[i]
+            }
+        );
+     }
+     return({
+        'labels': [
+            '登录',
+            '新建角色', '新建用户','新建元数据模板','新建数据模型','新建数据库','新建集合',
+            '上传ImageData','上传三四级影像数据' ,'上传DEMData','上传VectorData','上传FileData','上传ModelData',
+            '删除集合','删除数据', '删除所有数据', 
+        ],
+        'series': series
+     })
+    };
 
-// var queryStrU = {
-//                 'timestamp':{ $gte: new Date(new Date('2017-03-01 23:48:24') - timePeroidArr[0])},
-//                 'user': user
-//                 }
-
+//{"timestamp": "2014-09-25T00:00:00", "value": {"PM2.5": 30.22}}
+var HeatData = function(dataArr){
+   return ( {
+        "data": dataArr
+        });
+}
 
 module.exports ={
+
+    getHeat: function(db,filters, response){
+            var timeSpan = timePeroidArr[filters.time]/ TSU;
+            var timeSpan2 = timeSpan / TSU;
+
+    
+            var data = new HeatData([]);
+
+            var queryStrHeat = {
+                "timeSpan" :{ $gte: new Date(currentTime- timePeroidArr[filters.time]).toISOString()},
+            }
+            this.queryU(db, queryStrHeat, function(err, res){
+
+                 for(var j = 0; j< filters.users.length; j++){
+                            for(var i = 0; i<res.length; i++){
+                            var thisTime = new Date(res[i].timestamp)
+                                for( var k = 0 ; k < TSU ; k ++){
+                                    if(currentTime - thisTime < timeSpan * (k+1) && currentTime - thisTime > timeSpan * k){
+                                        if(res[i].user == filters.users[j] ){
+                                             data[TSU-k-1][filters.users[i]] += 1; 
+                                        }     
+                                    }
+                                }
+                            }
+                    }
+                for(var i = 0; i< res.length ; i++){
+                    data.data.push(
+                        {
+                            "timestamp": res[i].timestamp,
+                            "value": {
+                                "count": 0
+                            }
+                        }
+                    );
+                }
+            })
+            
+    },
+
+    getBar :function(db, filters, response){
+
+            var data = new BarData(filters.users,[]);
+            var user_values = [ ];
+            for (var i = 0; i< filters.users.length ; i++){
+                user_values.push({'label':filters.users[i],'values':[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]});
+            }
+
+            var queryStrBar  = {
+                "timestamp" :{ $gte: new Date(currentTime - timePeroidArr[filters.time]).toISOString()},
+            }
+            this.queryU(db, queryStrBar, function(err,res){
+                if (err)  console.log(err);
+                for(var j = 0; j< filters.users.length ; j++){
+                    for(var i = 0; i<res.length ; i++){
+                
+                        if (res[i].user == filters.users[j] ){
+                                if(res[i].action == '新建'){
+                                        if(res[i].object == '角色'){
+                                            user_values[j].values[1] +=1;
+                                        }else if(res[i].object == '用户'){
+                                            user_values[j].values[2] +=1;
+                                        }else if(res[i].object == '元数据模板'){
+                                           user_values[j].values[3] +=1;
+                                        }else if(res[i].object == '数据模型'){
+                                            user_values[j].values[4] +=1;
+                                        }else if(res[i].object == '数据库'){
+                                           user_values[j].values[5]+=1;
+                                        }else if(res[i].object == '集合'){
+                                            user_values[j].values[6] +=1;
+                                        }
+                                } else if (res[i].action == '上传'){
+                                        if(res[i].object == 'ImageData角色'){
+                                            user_values[j].values[7] +=1;
+                                        }else if(res[i].object == '三四级影像数据'){
+                                            user_values[j].values[8] +=1;
+                                        }else if(res[i].object == 'DEMData'){
+                                            user_values[j].values[9] +=1;
+                                        }else if(res[i].object == 'VectorData'){
+                                            user_values[j].values[10] +=1;
+                                        }else if(res[i].object == 'FileData'){
+                                            user_values[j].values[11] +=1;
+                                        }else if(res[i].object == 'ModelData'){
+                                            user_values[j].values[12] +=1;
+                                        }
+                                }else if (res[i].action == '登录'){
+                                    user_values[j].values[0] +=1;
+                                }else if(res[i].action == '删除'){
+                                    user_values[j].values[13]+=1;
+                                }else if(res[i].action == '删除数据'){
+                                    user_values[j].values[14]+=1;
+                                }else if (res[i].action == '删除所有数据'){
+                                    user_values[j].values[15] +=1;
+                                }
+                        }
+                    }
+                }
+                data.series = user_values;
+                return response.send(data);
+            })
+    },
+
     //y - axis  active level -- the action number with one time peroid  
     getLine :function (db,filters, response){
-            var timeSpan = timePeroidArr[filters.time]/6;
-            var currentTime = new Date('2017-03-01 23:48:24');
-            // console.log(currentTime);
-            // console.log(timeSpan);
-            var data = new lineData(currentTime, timeSpan);
-            console.log(new Date(currentTime- timePeroidArr[filters.time]));
-            var queryStr1 = {
+            var timeSpan = timePeroidArr[filters.time]/TSU;
+            var data = new LineData(currentTime, timeSpan, filters.users);
+    
+            var queryStrLine = {
                 "timestamp":{ $gte: new Date(currentTime- timePeroidArr[filters.time]).toISOString()}
             }   
-            console.log(queryStr1);        
-                this.queryU(db,queryStr1,function(err,res){
+          
+                this.queryU(db,queryStrLine,function(err,res){
                     if(err){ console.log(err)}
-                   for(var i = 0; i<res.length; i++){
-                       var thisTime = new Date(res[i].timestamp)
-                       console.log(res[i].timestamp);
-                       if(  currentTime - thisTime < timeSpan){
-                            if(res[i].user == 'root') data[5].root += 1;
-                       }else if ( currentTime - thisTime > timeSpan && currentTime - thisTime< timeSpan *2  ){
-                            if(res[i].user == 'root') data[4].root += 1;
-                       }else if ( currentTime - thisTime > 2 * timeSpan && currentTime - thisTime< timeSpan * 3  ){
-                            if(res[i].user == 'root') data[3].root += 1;
-                       }else if (  currentTime - thisTime> 3 * timeSpan && currentTime - thisTime< timeSpan * 4  ){
-                            if(res[i].user == 'root') data[2].root += 1;
-                       }
-                       else if (  currentTime - thisTime> 4 * timeSpan && currentTime - thisTime< timeSpan * 5  ){
-                            if(res[i].user == 'root') data[1].root += 1;
-                       }
-                       else if (  currentTime - thisTime> 5 * timeSpan && currentTime - thisTime< timeSpan * 6  ){
-                            if(res[i].user == 'root') data[0].root += 1;
-                       }
-                   }
-                   console.log(data);
+                    for(var j = 0; j< filters.users.length; j++){
+                            for(var i = 0; i<res.length; i++){
+                            var thisTime = new Date(res[i].timestamp)
+                                for( var k = 0 ; k < TSU ; k ++){
+                                    if(currentTime - thisTime < timeSpan * (k+1) && currentTime - thisTime > timeSpan * k){
+                                        if(res[i].user == filters.users[j] ){
+                                             data[TSU-k-1][filters.users[i]] += 1; 
+                                        }     
+                                    }
+                                }
+                            }
+                    }
                    return response.send(data);
                 });
     },
@@ -110,18 +225,11 @@ module.exports ={
             db.collection('log').find({'user': user}).toArray(cb);
         }
     ,
-    // queryP : function(db,query){
-    //     return new Promise(function (fulfill, reject){
-    //         var res =  db.collection('log').find(query).toArray();
-    //         if (err) reject(err);
-    //         else return(res);
-    //     });
-    // },
     queryU : function (db,query,cb){
                 db.collection('log').find(query).toArray(cb);
     },
     
-    getBubbleData : function(db,filters,response) {
+    getBubble : function(db,filters,response) {
             
             var myNew_actionArr = new_actionArr(0,0,0,0,0,0);
             var myUpload_actionArr = upload_actionArr(0,0,0,0,0,0);
@@ -171,7 +279,7 @@ module.exports ={
                     }
                 }
             
-            var resultArr = bubbleData(myNew_actionArr,myUpload_actionArr,login,del,delD,delAll);
+            var resultArr = BubbleData(myNew_actionArr,myUpload_actionArr,login,del,delD,delAll);
             resultArr.children[1].children = myUpload_actionArr;
             resultArr.children[2].size = login;
             resultArr.children[3].size = del;
@@ -180,20 +288,11 @@ module.exports ={
 
             return response.send( resultArr);
           });
-    }
-
+    },
+ 
 
 
 }
-
-
-
-
-// var newActions = ["角色","用户","元数据模板","数据模型","数据库","集合"];
-// var loginAction = "登录";
-// var uploadActions = ["ImageData","三四级影像数据","DEMData","VectorData","FileData","ModelData"];
-// var delActions = ["删除","删除数据","删除所有数据"]
-
 
 
             // var queryStrs = [
