@@ -117,40 +117,28 @@ app.get('/api/heatMapData',function(req,res){
 });
 
 app.get('/api/barChartData',function(req,res){
-        var data = {
-        labels: [
-            'resilience', 'maintainability', 'accessibility',
-            'uptime', 'functionality', 'impact'
-        ],
-        series: [
-            {
-            label: '2012',
-            values: [4, 8, 15, 16, 23, 42]
-            },
-            {
-            label: '2013',
-            values: [12, 43, 22, 11, 73, 25]
-            },
-            {
-            label: '2014',
-            values: [31, 28, 14, 8, 15, 21]
-            },]
-        };
-        return res.json(data);
+    var filters = {
+        'time' : 3,
+        'users': ['root', 'hui', 'chen']
+    }
+    dataU.getBar(db,filters, res);
 })
 
 //time from 0 - 5
 app.get('/api/lineChartData',function(req,res){
     var filters = {
         'time' : 3,
-        'user': ['root']
+        'users': ['root', 'hui', 'chen']
     }
     dataU.getLine(db,filters,res);
 });
 
 app.get('/api/bubbleChartData',function(req,res){
-  filters = req.body.params;
-  dataU.getBubbleData(db,filters,res);
+   var filters = {
+        'time' : 3,
+        'users': ['root', 'hui', 'chen']
+    }
+  dataU.getBubble(db,filters,res);
 });
 
 

@@ -24,7 +24,7 @@ class BubbleChart extends React.Component{
         // d3.json("flare.json", function(error, data) {
         // if (error) throw error;
         var data  = this.data;
-        if(data){
+        if(data && data.length != 0){
             var root = d3.hierarchy(classes(data))
                 .sum(function(d) { return d.value; })
                 .sort(function(a, b) { return b.value - a.value; });
