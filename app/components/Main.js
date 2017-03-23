@@ -24,8 +24,8 @@ class Main extends React.Component{
         if(this.state.view == "logs_users"){
             currentView = <Logs {...props} />
         } 
-        if(this.state.view == "logs_files"){
-            currentView = <Logs {...props} />
+        if(this.state.view == "analysis"){
+            currentView = <UserAnalysis {...props} />
         }         
         return(
             {currentView}

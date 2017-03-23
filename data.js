@@ -1,13 +1,14 @@
 
 var Promise = require('promise');
 
+var dataCol = 'hdfs_log';
 //Time Peroid 
 var oneH = 1000 * 60 * 60;
 var timePeroidArr = [oneH, oneH * 6, oneH * 12, oneH * 24, oneH * 24 * 2, oneH * 24 * 7, oneH * 24 * 30,oneH * 24 * 360];
 var TSU = 6;
-var currentTime = new Date('2017-03-01 23:48:24');
+var currentTime = new Date('2017-03-20 23:48:24');
 //Bubble Chart 
-var BubbleData = function(new_actionArr,upload_actionArr,login,del,delD,delAll){
+var BubbleData = function(new_actionArr,upload_actionArr,update_actionArr,login,del,delD,delAll,checkPass){
             return (
             {
                     "name": "resultArr",
@@ -19,11 +20,16 @@ var BubbleData = function(new_actionArr,upload_actionArr,login,del,delD,delAll){
                         {
                         "name": "上传 ",
                         "children": upload_actionArr
-                        },
+                         },
+                         {
+                        "name": "修改",
+                        "children": update_actionArr
+                         },
                         {"name": "登录", "size": login},
                         {"name": "删除集合", "size": del},
                         {"name":"删除数据", "size": delD},
-                        {"name":"删除所有数据", "size": delAll}
+                        {"name":"删除所有数据", "size": delAll},
+                        {"name":"审计通过","size":checkPass}
                     ]
             });
     };
@@ -49,6 +55,12 @@ var    upload_actionArr = function(ImageD,TFData,DemD,VecD,FD,MD){
                         ]
             );
     };
+ var update_actionArr = function(userP, cate){
+     return([
+         {"name": "用户角色", "size": userP},
+          {"name": "目录", "size": cate },
+     ]);
+ }   
 //Line Chart   divided by 6 
  var LineData = function(currentTime,timeSpan,users) {
     var data = [];
@@ -65,7 +77,7 @@ var    upload_actionArr = function(ImageD,TFData,DemD,VecD,FD,MD){
       return data;
  }
 
- var BarData = function(users, users_values) {
+ var BarData = function(labels, users, users_values) {
      var series = [];
      for(var i = 0; i<users.length ; i++){
         series.push(
@@ -76,15 +88,11 @@ var    upload_actionArr = function(ImageD,TFData,DemD,VecD,FD,MD){
         );
      }
      return({
-        'labels': [
-            '登录',
-            '新建角色', '新建用户','新建元数据模板','新建数据模型','新建数据库','新建集合',
-            '上传ImageData','上传三四级影像数据' ,'上传DEMData','上传VectorData','上传FileData','上传ModelData',
-            '删除集合','删除数据', '删除所有数据', 
-        ],
+        'labels': labels,
         'series': series
      })
     };
+
 
 //{"timestamp": "2014-09-25T00:00:00", "value": {"PM2.5": 30.22}}
 var HeatData = function(dataArr){
@@ -103,7 +111,7 @@ module.exports ={
             var data = new HeatData([]);
 
             var queryStrHeat = {
-                "timeSpan" :{ $gte: new Date(currentTime- timePeroidArr[filters.time]).toISOString()},
+                "timestamp" :{ $gte: new Date(currentTime- timePeroidArr[filters.time]).toISOString()},
             }
             this.queryU(db, queryStrHeat, function(err, res){
 
@@ -135,12 +143,13 @@ module.exports ={
 
     getBar :function(db, filters, response){
 
-            var data = new BarData(filters.users,[]);
+            var data = new BarData([],filters.users,[]);
             var user_values = [ ];
             for (var i = 0; i< filters.users.length ; i++){
-                user_values.push({'label':filters.users[i],'values':[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]});
+                user_values.push({'label':filters.users[i],'values':[]});
             }
-
+            // labels.length = user_values.values.length
+            var labels = ["登录"];
             var queryStrBar  = {
                 "timestamp" :{ $gte: new Date(currentTime - timePeroidArr[filters.time]).toISOString()},
             }
@@ -148,49 +157,26 @@ module.exports ={
                 if (err)  console.log(err);
                 for(var j = 0; j< filters.users.length ; j++){
                     for(var i = 0; i<res.length ; i++){
-                
+                        
                         if (res[i].user == filters.users[j] ){
-                                if(res[i].action == '新建'){
-                                        if(res[i].object == '角色'){
-                                            user_values[j].values[1] +=1;
-                                        }else if(res[i].object == '用户'){
-                                            user_values[j].values[2] +=1;
-                                        }else if(res[i].object == '元数据模板'){
-                                           user_values[j].values[3] +=1;
-                                        }else if(res[i].object == '数据模型'){
-                                            user_values[j].values[4] +=1;
-                                        }else if(res[i].object == '数据库'){
-                                           user_values[j].values[5]+=1;
-                                        }else if(res[i].object == '集合'){
-                                            user_values[j].values[6] +=1;
+                            if(! labels.includes( res[i].action) ){
+                                labels.push(res[i].action);
+                                user_values[j].values.push(1);
+                            }else {
+                                for(var k = 0; k < labels.length ; k ++){
+                                    if(res[i].action == labels[k]){
+                                        while(user_values[j].values.length <= k){
+                                            user_values[j].values.push(0);
                                         }
-                                } else if (res[i].action == '上传'){
-                                        if(res[i].object == 'ImageData角色'){
-                                            user_values[j].values[7] +=1;
-                                        }else if(res[i].object == '三四级影像数据'){
-                                            user_values[j].values[8] +=1;
-                                        }else if(res[i].object == 'DEMData'){
-                                            user_values[j].values[9] +=1;
-                                        }else if(res[i].object == 'VectorData'){
-                                            user_values[j].values[10] +=1;
-                                        }else if(res[i].object == 'FileData'){
-                                            user_values[j].values[11] +=1;
-                                        }else if(res[i].object == 'ModelData'){
-                                            user_values[j].values[12] +=1;
-                                        }
-                                }else if (res[i].action == '登录'){
-                                    user_values[j].values[0] +=1;
-                                }else if(res[i].action == '删除'){
-                                    user_values[j].values[13]+=1;
-                                }else if(res[i].action == '删除数据'){
-                                    user_values[j].values[14]+=1;
-                                }else if (res[i].action == '删除所有数据'){
-                                    user_values[j].values[15] +=1;
+                                        user_values[j].values[k] += 1;
+                                    }
                                 }
+                            }
                         }
                     }
                 }
                 data.series = user_values;
+                data.labels = labels;
                 return response.send(data);
             })
     },
@@ -210,9 +196,11 @@ module.exports ={
                             for(var i = 0; i<res.length; i++){
                             var thisTime = new Date(res[i].timestamp)
                                 for( var k = 0 ; k < TSU ; k ++){
+                              
                                     if(currentTime - thisTime < timeSpan * (k+1) && currentTime - thisTime > timeSpan * k){
                                         if(res[i].user == filters.users[j] ){
-                                             data[TSU-k-1][filters.users[i]] += 1; 
+                                           
+                                             data[TSU-k-1][filters.users[j]] += 1; 
                                         }     
                                     }
                                 }
@@ -222,94 +210,143 @@ module.exports ={
                 });
     },
     getLogsByUser : function(db,user, cb) {
-            db.collection('log').find({'user': user}).toArray(cb);
+                db.collection(dataCol).find({'user': user}).toArray(cb);
         }
     ,
     queryU : function (db,query,cb){
-                db.collection('log').find(query).toArray(cb);
+                db.collection(dataCol).find(query).toArray(cb);
     },
     
     getBubble : function(db,filters,response) {
-            
-            var myNew_actionArr = new_actionArr(0,0,0,0,0,0);
-            var myUpload_actionArr = upload_actionArr(0,0,0,0,0,0);
-            var login =0, del =0, delD = 0, delAll = 0;
-            var query = {};
-            
-            this.queryU(db,query,function(err,res){
-                //console.log(res);
-                for(var i = 0; i< res.length; i++){
-                    if(res[i].action == '新建'){
-                            if(res[i].object == '角色'){
-                                myNew_actionArr[0].size +=1;
-                            }else if(res[i].object == '用户'){
-                                myNew_actionArr[1].size +=1;
-                            }else if(res[i].object == '元数据模板'){
-                                myNew_actionArr[2].size +=1;
-                            }else if(res[i].object == '数据模型'){
-                               myNew_actionArr[3].size+=1;
-                            }else if(res[i].object == '数据库'){
-                                myNew_actionArr[4].size+=1;
-                            }else if(res[i].object == '集合'){
-                                myNew_actionArr[5].size +=1;
+          
+             var bubbleData = { 
+                'name':'bubble',
+                'children':[]
+            }
+            for(var i = 0; i< filters.users.length; i++){
+                bubbleData.children.push({
+                    'name': filters.users[i],
+                    'children':[]
+                });
+            }
+            var myNew_actionArr = new new_actionArr(0,0,0,0,0,0);
+            var myUpload_actionArr = new upload_actionArr(0,0,0,0,0,0);
+            var myUpdate_actionArr = new update_actionArr(0,0);
+            var checkPass = 0, login = 0, del = 0, delD = 0, delAll = 0;
+            var queryStrBubble = {
+                "timestamp":{ $gte: new Date(currentTime- timePeroidArr[filters.time]).toISOString()}
+            }   
+
+            this.queryU(db,queryStrBubble,function(err,res){
+
+                for(var j =0; j< filters.users.length ; j++){
+                    for(var i = 0; i< res.length; i++){
+                        if(res[i].action == '新建'){
+                                if(res[i].object == '角色'){
+                                    myNew_actionArr[0].size +=1;
+                                }else if(res[i].object == '用户'){
+                                    myNew_actionArr[1].size +=1;
+                                }else if(res[i].object == '元数据模板'){
+                                    myNew_actionArr[2].size +=1;
+                                }else if(res[i].object == '数据模型'){
+                                myNew_actionArr[3].size+=1;
+                                }else if(res[i].object == '数据库'){
+                                    myNew_actionArr[4].size+=1;
+                                }else if(res[i].object == '集合'){
+                                    myNew_actionArr[5].size +=1;
+                                }
+                        }
+                        else if (res[i].action == '上传'){
+                                if(res[i].object == 'ImageData角色'){
+                                    myUpload_actionArr[0].size +=1;
+                                }else if(res[i].object == '三四级影像数据'){
+                                    myUpload_actionArr[1].size +=1;
+                                }else if(res[i].object == 'DEMData'){
+                                    myUpload_actionArr[2].size +=1;
+                                }else if(res[i].object == 'VectorData'){
+                                    myUpload_actionArr[3].size +=1;
+                                }else if(res[i].object == 'FileData'){
+                                    myUpload_actionArr[4].size +=1;
+                                }else if(res[i].object == 'ModelData'){
+                                    myUpload_actionArr[5].size +=1;
+                                }
+                        }else if (res[i].action == '登录'){
+                            login +=1;
+                        }else if(res[i].action == '删除'){
+                            del+=1;
+                        }else if(res[i].action == '删除数据'){
+                            delD+=1;
+                        }else if (res[i].action == '删除所有数据'){
+                            delAll +=1;
+                        }else if (res[i].action =='审计通过'){
+                            checkPass +=1;
+                        }else if(res[i].action == '修改'){
+                            if(res[i].object =='用户信息'){
+                                myUpdate_actionArr[0].size +=1;
                             }
-                    }
-                    else if (res[i].action == '上传'){
-                            if(res[i].object == 'ImageData角色'){
-                                myUpload_actionArr[0].size +=1;
-                            }else if(res[i].object == '三四级影像数据'){
-                                myUpload_actionArr[1].size +=1;
-                            }else if(res[i].object == 'DEMData'){
-                                myUpload_actionArr[2].size +=1;
-                            }else if(res[i].object == 'VectorData'){
-                                myUpload_actionArr[3].size +=1;
-                            }else if(res[i].object == 'FileData'){
-                                myUpload_actionArr[4].size +=1;
-                            }else if(res[i].object == 'ModelData'){
-                                myUpload_actionArr[5].size +=1;
+                            if(res[i].object =='目录'){
+                                myUpdate_actionArr[1].size +=1;
                             }
-                    }else if (res[i].action == '登录'){
-                        login +=1;
-                    }else if(res[i].action == '删除'){
-                        del+=1;
-                    }else if(res[i].action == '删除数据'){
-                        delD+=1;
-                    }else if (res[i].action == '删除所有数据'){
-                        delAll +=1;
+                        }  
                     }
+                        var resultArr = BubbleData(myNew_actionArr,myUpload_actionArr,myUpdate_actionArr, login,del,delD,delAll,checkPass);
+                        resultArr.children[1].children = myUpload_actionArr;
+                        resultArr.children[2].children = myUpdate_actionArr;
+                        resultArr.children[3].size = login;
+                        resultArr.children[4].size = del;
+                        resultArr.children[5].size = delD;
+                        resultArr.children[6].size = delAll;
+                        bubbleData.children[j] = resultArr;
                 }
             
-            var resultArr = BubbleData(myNew_actionArr,myUpload_actionArr,login,del,delD,delAll);
-            resultArr.children[1].children = myUpload_actionArr;
-            resultArr.children[2].size = login;
-            resultArr.children[3].size = del;
-            resultArr.children[4].size = delD;
-            resultArr.children[5].size = delAll;
-
-            return response.send( resultArr);
+        
+             return response.send( bubbleData);
           });
     },
  
+                //  for(var j = 0; j< bubbleData.children.length ; j++){
+                //     for(var i = 0; i<res.length ; i++){
+                //         if (res[i].user == bubbleData.children[j].name ){
+                //             var index = searchInnJson(bubbleData.children[j], res[i].action);
+  
+                //             if(index!=false){
+                //                 console.log(res[i].action);
+                //                 var index2= searchInnJson(bubbleData.children[j].children[index], res[i].object);
+                //                // console.log(res[i].object);
+                //                 if(index2 != false){
+                //                     console.log(res[i].object);
+                //                     console.log(index2);
+                //                     bubbleData.children[j].children[index].children[index2].size += 1;
+                //                 }else{
+                //                      bubbleData.children[j].children[index].children.push({'name':res[i].action+res[i].object+"",'size':1});
+                //                 }
+                //             }else{
+                //                  bubbleData.children[j].children.push({'name':res[i].action+"",'children':[]});
+                //             }
+                //         }
+                //     }
+                 //}
+
+          
+
+            //       var searchInnJson = function(json, value){
+                
+
+            //     //console.log(json.children);
+            //     if(json.children.length == 0)  return false;
+             
+            //     for(var i =0 ; i< json.children.length; i++){
+            //        // console.log(json.children[i].name );
+            //        //console.log("ziji"+json.children[i].name.indexOf(value) != -1);
+            //        console.log(" this is number x" + i);
+            //         if( json.children[i].name == value ) {
+            //             return i;
+            //         }else if ( json.children[i].name.indexOf(value) != -1 ){
+            //             return i;
+            //         }
+            //     }
+            //     return false;
+            // }
 
 
 }
-
-
-            // var queryStrs = [
-            //     {'object':'角色','action':'新建'},
-            //     {'object':'用户','action':'新建'},
-            //     {'object':'元数据模板','action':'新建'},
-            //     {'object':'数据模型','action':'新建'},
-            //     {'object':'数据库','action':'新建'},
-            //     {'object':'集合','action':'新建'},
-            //     {'object':'ImageData','action':'上传'},
-            //     {'object':'三四级影像数据','action':'上传'},
-            //     {'object':'DEMData','action':'上传'},
-            //     {'object':'VectorData','action':'上传'},
-            //     {'object':'FileData','action':'上传'},
-            //     {'object':'ModelData','action':'上传'},
-            //     {'action':'登录'},
-            //     {'action':'删除'},
-            //     {'action':'删除数据'},
-            //     {'action':'删除所有数据'}
-            // ]

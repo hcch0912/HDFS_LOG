@@ -21,11 +21,11 @@ class BubbleChart extends React.Component{
             .attr("height", diameter)
             .attr("class", "bubble");
 
-        // d3.json("flare.json", function(error, data) {
-        // if (error) throw error;
-        var data  = this.data;
-        if(data && data.length != 0){
-            var root = d3.hierarchy(classes(data))
+      
+        var datas  = this.data;
+       for(var i = 0; i < datas.children.length; i++){
+        if(datas && datas.children.length != 0){
+            var root = d3.hierarchy(classes(datas.children[i]))
                 .sum(function(d) { return d.value; })
                 .sort(function(a, b) { return b.value - a.value; });
 
@@ -34,7 +34,7 @@ class BubbleChart extends React.Component{
                 .data(root.children)
                 .enter().append("g")
                 .attr("class", "node")
-                .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+                .attr("transform", function(d) { return "translate(" + (d.x+200*i )+ "," + d.y + ")"; });
 
             node.append("title")
                 .text(function(d) { return d.data.className + ": " + format(d.value); });
@@ -46,8 +46,10 @@ class BubbleChart extends React.Component{
                 });
 
             node.append("text")
-                .attr("dy", ".3em")
+                .attr("dy", ".5em")
                 .style("text-anchor", "middle")
+                .style("font-size","10px")
+                .style("fill","white")
                 .text(function(d) { return d.data.className.substring(0, d.r / 3); });
         // });
 
@@ -66,6 +68,8 @@ class BubbleChart extends React.Component{
 
             d3.select(self.frameElement).style("height", diameter + "px");
         }
+       }
+
     }
     render(){
          var div = new ReactFauxDOM.createElement('div');

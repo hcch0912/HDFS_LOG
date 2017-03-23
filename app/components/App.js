@@ -3,6 +3,7 @@ import Header from './Header';
 import SideBar from './Sidebar';
 import Dashboard from './Dashboard';
 import Logs from './Log';
+import AnalysisPage from './AnalysisPage';
 import MainStore from '../stores/MainStore';
 import MainActions from '../actions/MainActions';
 
@@ -33,7 +34,7 @@ class App extends React.Component {
         this.setState(state);
     }
     onChangeView(target){
-      MainActions.gotoView(target);
+        MainActions.gotoView(target);
     }
    render() {
        
@@ -42,15 +43,18 @@ class App extends React.Component {
             currentView = <Dashboard />
         } 
         
-        if(this.state.view == "logs_users" || this.state.view == "logs_files"){
+        if(this.state.view == "logs_users" ){
             var logProps = {
               view: this.state.view
             }  
             currentView = <Logs {...logProps} />
         } 
-        // if(this.state.view == "logs_files"){
-        //     currentView = <Logs {...props} />
-        // }    
+        if(this.state.view == "analysis"){
+          var AnaProps = {
+              view: this.state.views
+          }
+            currentView = <AnalysisPage {...AnaProps} />
+        }    
         var sidebarProps = {
           changeView: this.onChangeView.bind(this),
         }   

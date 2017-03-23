@@ -8,7 +8,7 @@ class DashboardStore {
         this.filters = [];
         this.heatMapData = [];
         this.barChartData = [];
-        this.bubbleChartData = [];
+        this.bubbleChartData = {"name":"",children:[]};
         this.lineChartData = [];
     }
     onGetUsersSuccess(data){

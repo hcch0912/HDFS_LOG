@@ -41,7 +41,7 @@ MongoClient.connect(dbLocal, function(err, database) {
   if(err) throw err;
   console.log("database connected");
   db = database;
-  // Start the application after the database connection is ready
+  //Start the application after the database connection is ready
   // db.authenticate(dbUsername,dbPassword,'--authenticationDatabase admin',function(err,res){
   //           if(err)
   //           {
@@ -84,7 +84,7 @@ app.get('/api/insert',function(req,res){
           if(err) console.log(err);
           else{
             obj.data.forEach(function(row){
-                db.collection('log').insert(row);
+                db.collection('hdfs_log').insert(row);
             });
           }
         })
@@ -118,7 +118,7 @@ app.get('/api/heatMapData',function(req,res){
 
 app.get('/api/barChartData',function(req,res){
     var filters = {
-        'time' : 3,
+        'time' : 6,
         'users': ['root', 'hui', 'chen']
     }
     dataU.getBar(db,filters, res);
@@ -127,7 +127,7 @@ app.get('/api/barChartData',function(req,res){
 //time from 0 - 5
 app.get('/api/lineChartData',function(req,res){
     var filters = {
-        'time' : 3,
+        'time' : 6,
         'users': ['root', 'hui', 'chen']
     }
     dataU.getLine(db,filters,res);
@@ -135,7 +135,7 @@ app.get('/api/lineChartData',function(req,res){
 
 app.get('/api/bubbleChartData',function(req,res){
    var filters = {
-        'time' : 3,
+        'time' : 6,
         'users': ['root', 'hui', 'chen']
     }
   dataU.getBubble(db,filters,res);
@@ -153,6 +153,26 @@ app.get('/api/logs',function(req,res){
         });
 });
 
+app.get('/api/userAnaData', function(req,res){
+             var data = [ 
+                     {"id":"Users"}, 
+                     {"id":"Users.root"}, 
+                     {"id":"Users.root.登录","value":44, "color":"#FF9900"}, 
+                     {"id":"Users.root.用户管理","value":21, "color":"#F6854D"}, 
+                     {"id":"Users.root.审计","value":13, "color":"#D6BA33"}, 
+                     {"id":"Users.hui"}, 
+                     {"id":"Users.hui.登录","value":50, "color":"#6DB33F"},
+                     {"id":"Users.hui.上传","value":23, "color":"#5FA134"},
+                     {"id":"Users.hui.下载","value":23, "color":"#005F0F"},
+                     {"id":"Users.chen"}, 
+                     {"id":"Users.chen.上传","value":49, "color":"#00A0D2"},
+                     {"id":"Users.chen.新建","value":33, "color":"#00618A"},
+                     {"id":"Users.chen.登录","value":13, "color":"#0678BE"}
+               ]
+
+               return res.send(data);
+
+})
 
 app.use(function(req, res) {
   Router.match({ routes: routes.default, location: req.url }, function(err, redirectLocation, renderProps) {

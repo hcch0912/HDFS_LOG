@@ -27,7 +27,6 @@ class Log extends React.Component {
         this.setState(state);
     }
     render(){
-        console.log(this.state.logs);
         var tableContent = this.state.logs.map(function(row,i){
             return(
               
