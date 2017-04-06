@@ -18,6 +18,9 @@ class Main extends React.Component{
     }
     render(){
         var currentView ;
+        if(this.state.view == "login") {
+            currentView = <Login />
+        }
         if(this.state.view == "dashboard"){
             currentView = <Dashboard {...props}/>
         } 

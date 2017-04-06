@@ -8,6 +8,12 @@ class HeaderBar extends React.Component{
     handleClickGo(){
         this.props.rerenderWithFilter();
     }
+    
+    handleKeyPress(target) {
+        if(target.charCode==13){
+                alert('Enter clicked!!!');    
+        }
+    }
     render(){
 
          var usersOptions = this.props.users.map(function(user){
@@ -18,7 +24,7 @@ class HeaderBar extends React.Component{
                     <div className="ui  menu">
                         <div className="item">
                             <div className="ui icon input">
-                                <input type="text" placeholder="Search..." />
+                                <input type="text" placeholder="Search..."  onKeyPress={this.handleKeyPress} />
                                 <i className="search icon"></i>
                             </div>
                         </div>
@@ -27,15 +33,15 @@ class HeaderBar extends React.Component{
                         </div>
                         <div className="item">
                             <select className="ui dropdown">
-                                <option value="">  Time Peroid  </option>
-                                <option value="0">Last 1 hour</option>
-                                <option value="0">Last 6 hour</option>
-                                <option value="0">Last 12 hour</option>
-                                <option value="0">Last 1 day</option>
-                                <option value="0">Last 2 days</option>
-                                <option value="0">Last 7 days</option>
-                                <option value="1">Last 30 days</option>
-                                <option value="0">All </option>
+                                <option value="0">  Time Peroid  </option>
+                                <option value="1">Last 1 hour</option>
+                                <option value="2">Last 6 hour</option>
+                                <option value="3">Last 12 hour</option>
+                                <option value="4">Last 1 day</option>
+                                <option value="5">Last 2 days</option>
+                                <option value="6">Last 7 days</option>
+                                <option value="7">Last 30 days</option>
+                                <option value="8">All </option>
                             </select> 
                         </div>
                         <div className="item">

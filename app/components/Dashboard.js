@@ -6,7 +6,7 @@ import HeatMap from './charts/HeatMap';
 import BarChart from './charts/BarChart';
 import BubbleChart from './charts/BubbleChart';
 import LineChart from './charts/LineChart';
-
+import HotpotFile from './charts/HotpotFile';
 
 class Dashboard extends React.Component {
 
@@ -59,45 +59,55 @@ class Dashboard extends React.Component {
                 <div id = "dsPanel" className = "mainPanelBody">
                     <div className="ui two column grid">
                         <div className="column">
-                        <div className="ui fluid card">
-                            <div className="image chart"  >
-                                <HeatMap  { ...chartProps}  />
+                            <div className="ui fluid card">
+                                <div className="image chart"  >
+                                    <HeatMap  { ...chartProps}  />
+                                </div>
+                                <div className="content">
+                                <a className="header">User Activity Heatmap (Time Based)</a>
+                                </div>
                             </div>
-                            <div className="content">
-                            <a className="header">User Activity Heatmap (Time Based)</a>
-                            </div>
-                        </div>
                         </div>
                         <div className="column">
-                        <div className="ui fluid card">
-                            <div className="image chart ">
-                            <BarChart {...chartProps}  />
+                            <div className="ui fluid card">
+                                <div className="image chart ">
+                                <BarChart {...chartProps}  />
+                                </div>
+                                <div className="content">
+                                <a className="header">Activity Calculation Chart (User Based)</a>
+                                </div>
                             </div>
-                            <div className="content">
-                            <a className="header">Activity Calculation Chart (User Based)</a>
-                            </div>
-                        </div>
                         </div>
                         <div className="column">
-                        <div className="ui fluid card">
-                            <div className="image chart">
-                            <BubbleChart {...chartProps}  />
+                            <div className="ui fluid card">
+                                <div className="image chart">
+                                <BubbleChart {...chartProps}  />
+                                </div>
+                                <div className="content">
+                                <a className="header">Activity Density Bubble Chart</a>
+                                </div>
                             </div>
-                            <div className="content">
-                            <a className="header">Activity Density Bubble Chart</a>
-                            </div>
-                        </div>
                         </div>
                         <div className="column">
-                        <div className="ui fluid card">
-                            <div className="image chart">
-                            <LineChart {...chartProps}  />
-                            </div>
-                            <div className="content">
-                            <a className="header">Activity Line Chart</a>
+                            <div className="ui fluid card">
+                                <div className="image chart">
+                                <LineChart {...chartProps}  />
+                                </div>
+                                <div className="content">
+                                <a className="header">Activity Line Chart</a>
+                                </div>
                             </div>
                         </div>
-                        </div>
+                        {/*<div className="column">
+                            <div className="ui fluid card">
+                                <div className="image chart">
+                                <HotpotFile {...chartProps}  />
+                                </div>
+                                <div className="content">
+                                <a className="header"> Hot Spot Files</a>
+                                </div>
+                            </div>
+                        </div>*/}
                     </div>
                 </div>
                 </section>

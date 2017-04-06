@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactTable from 'react-table';
 import LogStore from '../stores/LogStore';
 import LogActions from '../actions/LogActions';
 import HeaderBar from './HeaderBar';
@@ -27,19 +28,34 @@ class Log extends React.Component {
         this.setState(state);
     }
     render(){
-        var tableContent = this.state.logs.map(function(row,i){
-            return(
-              
-                    <tr>
-                        <td>{row.user} </td>
-                        <td>{row.action}</td>
-                        <td>{row.object}</td>
-                        <td>{row.name} </td>
-                        <td>{row.message}</td>
-                        <td>{row.timestamp}</td>
-                    </tr>
-            );
-        });
+        var data = this.state.logs;
+        var columns = [{
+            header:'User',
+            accessor:'user',
+            filterMethod: (filter, row) => (row[filter.id].startsWith(filter.value) && row[filter.id].endsWith(filter.value))
+        },{
+            header:'Action',
+            accessor:'action',
+            filterMethod: (filter, row) => (row[filter.id].includes(filter.value))
+        },{
+            header:'Object',
+            accessor: 'object',
+            filterMethod: (filter, row) => (row[filter.id].includes(filter.value))
+        },{
+            header:'Name',
+            accessor:'name',
+            filterMethod: (filter, row) => (row[filter.id].includes(filter.value))
+        },{
+            header:'Message',
+            accessor:'message',
+            filterMethod: (filter, row) => (row[filter.id].includes(filter.value))
+        },{
+            header:'Time',
+            accessor:'timestamp',
+            filterMethod: (filter, row) => (row[filter.id].includes(filter.value))
+        }
+        ];
+  
         var headerBarProps = {
            users : this.state.users,
            filters: this.state.filters
@@ -48,19 +64,12 @@ class Log extends React.Component {
             <section id = "log" className = "mainPanel">
                 <HeaderBar {...headerBarProps}  />
                 <div id = "logTable" className = "mainPanelBody">
-                   <table className="ui celled table" >
-                        <thead>
-                            <tr><th>User</th>
-                            <th>Action</th>
-                            <th>Object</th>
-                            <th> Name </th>
-                            <th> Message </th>
-                            <th> Time </th>
-                        </tr></thead>
-                         <tbody  >
-                            {tableContent}
-                        </tbody>
-                        </table>
+            
+                        <ReactTable
+                         data = {data}
+                         columns = {columns}
+                         defaultFilterMethod={(filter, row) => (String(row[filter.id]) === filter.value)}
+                        />
                     </div>
             </section>
         );

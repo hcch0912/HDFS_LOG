@@ -6,7 +6,7 @@ import Logs from './Log';
 import AnalysisPage from './AnalysisPage';
 import MainStore from '../stores/MainStore';
 import MainActions from '../actions/MainActions';
-
+import Login from './Login';
 
 class Main extends React.Component{
     constructor(props){
@@ -39,6 +39,11 @@ class App extends React.Component {
    render() {
        
         var currentView ;
+        if(this.state.view == "login"){
+          return (
+            <Login />
+        );
+        }
         if(this.state.view == "dashboard" || this.state.view == "" || !this.state.view){
             currentView = <Dashboard />
         } 

@@ -37,6 +37,12 @@ button,
 input[type="checkbox"] {
   outline: none;
 }
+.headerRight {
+	position:absolute;
+	color:black;
+	right: 30px;
+	top:30px;
+}
 
 .ui.table {
     font-size: 11px;
