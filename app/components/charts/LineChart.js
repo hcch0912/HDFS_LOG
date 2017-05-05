@@ -10,9 +10,7 @@ class LineChart  extends React.Component {
     componentDidMount(){
         var svg = d3.select(".linechart"),
             margin = {top: 20, right: 40, bottom: 20, left: 20},
-            // width = svg.attr("width") - margin.left - margin.right,
-            // height = svg.attr("height") - margin.top - margin.bottom,
-            width = 300,
+            width = 420,
             height = 350,
             g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         var parseTime = d3.timeParse("%Y%m%d");

@@ -78,7 +78,7 @@ app.get("/api/test", function(req, res) {
 });
 
 app.get('/api/insert',function(req,res){
-    var file = './data/llogs.json';
+    var file = './data/logfake.json';
     var data ;
         jsonfile.readFile(file, function(err, obj) {
           if(err) console.log(err);
@@ -101,7 +101,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.get('/api/users',function(req,res){
-    var users = ["All","root","other"]
+    var users = ["All","root","hui","chen","admin","test1"];
     res.send(users);
 });
 
@@ -127,7 +127,7 @@ app.get('/api/barChartData',function(req,res){
 //time from 0 - 5
 app.get('/api/lineChartData',function(req,res){
     var filters = {
-        'time' : 6,
+        'time' : 0,
         'users': ['root', 'hui', 'chen']
     }
     dataU.getLine(db,filters,res);
@@ -144,13 +144,16 @@ app.get('/api/bubbleChartData',function(req,res){
 
 app.get('/api/logs',function(req,res){
 
-   dataU.getLogsByUser(db,'root',function(err, data){
-            if (err) {
-                return res(err);
-            } else {
-                return res.json(data);
-            }
-        });
+  // query = {'object':'VectorData'}
+  var currentTime =  new Date('2017-04-07 23:48:24');
+   query = {"timestamp" :{ $gte: new Date(currentTime -  1000 * 60 * 60 * 24).toISOString()},}
+    dataU.queryU(db,query,function(err,data){
+       if (err) {
+                  return res(err);
+              } else {
+                  return res.json(data);
+              }
+    });
 });
 
 app.get('/api/userAnaData', function(req,res){

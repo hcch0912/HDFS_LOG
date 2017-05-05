@@ -8,8 +8,8 @@ class Abnormal extends React.Component{
     }
     render(){
          var abnormalList = [
-            {"user":"root", "action": "删除所有数据", "object":"VectorData","timestamp":"2017-03-01 14:15:39","count":400},
-            {"user":"root", "action": "删除数据", "object":"矢量数据","timestamp":"2017-03-01 14:15:40","count":30},
+            {"user":"root", "action": "删除所有数据", "object":"VectorData","timestamp":"2017-03-01 14:15:39","count":332},
+            {"user":"root", "action": "删除数据", "object":"矢量数据","timestamp":"2017-03-01 14:25:40","count":29},
         ]
         var table = new TableT(abnormalList);
          var div =(

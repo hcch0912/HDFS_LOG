@@ -12,7 +12,12 @@ class Setting extends React.Component {
          var table = new TableT(users);
           var div =(
             <div className = "ui segment" id="settingSeg" >
-                  <a className= "ui tag label" >  异常阈值设置 </a>
+                  <a className= "ui tag label" >  异常阈值设置 </a> 
+                  <br />
+                  <div className="ui slider checkbox">
+                                <input type="checkbox" className="newsletter" />
+                                <label>Auto Check</label>
+                  </div>
                   {table}
             </div>
           );
@@ -96,7 +101,15 @@ var OneRow = function(userName){
                         </div>
                         <p className = "td_inline" > in </p>
                         <div className="ui input td_inline">
-                            <input type="text" placeholder="Time Span" / >
+                            <select className="ui dropdown">
+                                    <option value= "0">30 seconds</option> 
+                                    <option value= "1">1 miunte</option>  
+                                    <option value="2">5 minute</option>
+                                    <option value="3">10 minute</option>
+                                    <option value="4">30 minutes</option>
+                                    <option value="5">1 hour</option>
+                                    <option value="6">2 hour</option>
+                 </select>  
                         </div>
 
                     </td>

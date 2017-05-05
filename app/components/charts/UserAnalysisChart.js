@@ -170,7 +170,7 @@ class UserAnalysisChart extends React.Component {
                     <div className="ui mini statistics">
                         <div className="orange statistic">
                             <div className="value">
-                            11:00 - 17:00
+                            10:00 - 15:00
                             </div>
                             <div className="label">
                             root

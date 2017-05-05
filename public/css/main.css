@@ -82,6 +82,7 @@ input[type="checkbox"] {
 .image.chart {
 	overflow: scroll;
 	height:400px;
+	background: white;
 }
 
 #linechart {

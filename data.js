@@ -6,7 +6,7 @@ var dataCol = 'hdfs_log';
 var oneH = 1000 * 60 * 60;
 var timePeroidArr = [oneH, oneH * 6, oneH * 12, oneH * 24, oneH * 24 * 2, oneH * 24 * 7, oneH * 24 * 30,oneH * 24 * 360];
 var TSU = 6;
-var currentTime = new Date('2017-03-20 23:48:24');
+var currentTime = new Date('2017-03-01 14:15:50');
 //Bubble Chart 
 var BubbleData = function(new_actionArr,upload_actionArr,update_actionArr,login,del,delD,delAll,checkPass){
             return (
@@ -186,37 +186,75 @@ module.exports ={
             var timeSpan = timePeroidArr[filters.time]/TSU;
             var data = new LineData(currentTime, timeSpan, filters.users);
     
-            var queryStrLine = {
-                "timestamp":{ $gte: new Date(currentTime- timePeroidArr[filters.time]).toISOString()}
-            }   
+            // var queryStrLine = {
+            //     "timestamp":{ $gte: new Date(currentTime- timePeroidArr[filters.time]).toISOString()}
+            // }   
           
-                this.queryU(db,queryStrLine,function(err,res){
-                    if(err){ console.log(err)}
-                    for(var j = 0; j< filters.users.length; j++){
-                            for(var i = 0; i<res.length; i++){
-                            var thisTime = new Date(res[i].timestamp)
-                                for( var k = 0 ; k < TSU ; k ++){
+            //     this.queryU(db,queryStrLine,function(err,res){
+            //         if(err){ console.log(err)}
+            //         for(var j = 0; j< filters.users.length; j++){
+            //                 for(var i = 0; i<res.length; i++){
+            //                 var thisTime = new Date(res[i].timestamp)
+            //                     for( var k = 0 ; k < TSU ; k ++){
                               
-                                    if(currentTime - thisTime < timeSpan * (k+1) && currentTime - thisTime > timeSpan * k){
-                                        if(res[i].user == filters.users[j] ){
+            //                         if(currentTime - thisTime < timeSpan * (k+1) && currentTime - thisTime > timeSpan * k){
+            //                             if(res[i].user == filters.users[j] ){
                                            
-                                             data[TSU-k-1][filters.users[j]] += 1; 
-                                        }     
-                                    }
-                                }
-                            }
-                    }
-                   return response.send(data);
-                });
+            //                                  data[TSU-k-1][filters.users[j]] += 1; 
+            //                             }     
+            //                         }
+            //                     }
+            //                 }
+            //         }
+            //        return response.send(data);
+            //     });
+            var fakeData = [
+                {
+                    "date": "2017-03-01T05:55:50.000Z",
+                    "chen":10,
+                    "hui":2,
+                    "root":9
+                },
+                {
+                    "date": "2017-03-01T06:05:50.000Z",
+                    "chen":0,
+                    "hui":6,
+                    "root":9
+                },
+                {
+                    "date": "2017-03-01T06:15:50.000Z",
+                    "chen":3,
+                    "hui":1,
+                    "root":400
+                },
+                {
+                    "date": "2017-03-01T06:25:50.000Z",
+                    "chen":5,
+                    "hui":10,
+                    "root":50
+                },
+                {
+                    "date": "2017-03-01T06:35:50.000Z",
+                    "chen":8,
+                    "hui":4,
+                    "root":9
+                }
+                
+            ]
+            return response.send(fakeData);
+            
     },
     getLogsByUser : function(db,user, cb) {
                 db.collection(dataCol).find({'user': user}).toArray(cb);
         }
     ,
+     getLogsAll :function(db, cb){
+        db.collection(dataCol).find({}).toArray(cb);
+    },
     queryU : function (db,query,cb){
                 db.collection(dataCol).find(query).toArray(cb);
     },
-    
+   
     getBubble : function(db,filters,response) {
           
              var bubbleData = { 

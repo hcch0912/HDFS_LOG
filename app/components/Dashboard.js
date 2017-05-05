@@ -65,6 +65,9 @@ class Dashboard extends React.Component {
                                 </div>
                                 <div className="content">
                                 <a className="header">User Activity Heatmap (Time Based)</a>
+                                <p> This chart shows the activity heat distribution through time line.
+                                    Red represents higher density of activity 
+                                </p>
                                 </div>
                             </div>
                         </div>
@@ -74,7 +77,11 @@ class Dashboard extends React.Component {
                                 <BarChart {...chartProps}  />
                                 </div>
                                 <div className="content">
-                                <a className="header">Activity Calculation Chart (User Based)</a>
+                                <a className="header">Actions Bar Chart (User Based)</a>
+                                <p> This chart shows the accumulated action count for each user, 
+                                    a cluster represents a kind of action with name on the axis,
+                                    the counted numbers are represented by the length of the bars.
+                                </p>
                                 </div>
                             </div>
                         </div>
@@ -84,7 +91,11 @@ class Dashboard extends React.Component {
                                 <BubbleChart {...chartProps}  />
                                 </div>
                                 <div className="content">
-                                <a className="header">Activity Density Bubble Chart</a>
+                                <a className="header">Actions Bubble Chart</a>
+                                <p>This charts shows the accumulated count results of each action. 
+                                    The numbers of count are represented by the size of the bubble. 
+                                    The bigger the bubble is, the more frequently the action has been done.
+                                </p>
                                 </div>
                             </div>
                         </div>
@@ -95,19 +106,26 @@ class Dashboard extends React.Component {
                                 </div>
                                 <div className="content">
                                 <a className="header">Activity Line Chart</a>
+                                <p> This chart shows the activity density trend though time line.
+                                    The x axis represents time, the y axis represents activity density count.
+                                    Different lines represent different users.
+                                </p>
                                 </div>
                             </div>
                         </div>
-                        {/*<div className="column">
+                        <div className="column">
                             <div className="ui fluid card">
                                 <div className="image chart">
-                                <HotpotFile {...chartProps}  />
+                                <img src ="http://localhost:3000/images/wordcloud1.png" />
                                 </div>
                                 <div className="content">
                                 <a className="header"> Hot Spot Files</a>
+                                <p> This chart shows the popularity of each file.
+                                    The larger the lable in the cloud, the more frequently the file has been used or visited
+                                </p>
                                 </div>
                             </div>
-                        </div>*/}
+                        </div>
                     </div>
                 </div>
                 </section>
